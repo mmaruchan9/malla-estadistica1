@@ -1,0 +1,67 @@
+const ramos = [
+  // Cada semestre es una fila
+  [
+    { id: "calculo1", nombre: "Cálculo I", requisitos: [] },
+    { id: "algebra1", nombre: "Álgebra Lineal", requisitos: [] },
+    { id: "fg1", nombre: "Formación General", tipo: "fg", requisitos: [] },
+  ],
+  [
+    { id: "calculo2", nombre: "Cálculo II", requisitos: ["calculo1"] },
+    { id: "algebra2", nombre: "Álgebra II", requisitos: ["algebra1"] },
+    { id: "opt1", nombre: "Optativo de Profundización", tipo: "optativo", requisitos: [] },
+  ],
+  [
+    { id: "probabilidades", nombre: "Probabilidades", requisitos: ["calculo2", "algebra2"] },
+    { id: "fg2", nombre: "Formación General", tipo: "fg", requisitos: [] },
+  ],
+];
+
+const malla = document.getElementById("malla");
+const estado = {}; // Guardamos qué ramos están aprobados
+
+function crearMalla() {
+  ramos.forEach((semestre, i) => {
+    const fila = document.createElement("div");
+    fila.classList.add("semestre");
+    fila.innerHTML = `<strong>Semestre ${i + 1}</strong>`;
+    
+    semestre.forEach((ramo) => {
+      const btn = document.createElement("button");
+      btn.textContent = ramo.nombre;
+      btn.classList.add("ramo");
+
+      if (ramo.tipo === "fg") btn.classList.add("fg");
+      if (ramo.tipo === "optativo") btn.classList.add("optativo");
+
+      btn.id = ramo.id;
+      btn.disabled = ramo.requisitos.length > 0;
+
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        btn.classList.add("aprobado");
+        btn.disabled = true;
+        estado[ramo.id] = true;
+        desbloquearRamos();
+      });
+
+      fila.appendChild(btn);
+    });
+
+    malla.appendChild(fila);
+  });
+}
+
+function desbloquearRamos() {
+  ramos.flat().forEach((ramo) => {
+    if (estado[ramo.id]) return; // Ya está aprobado
+
+    const requisitosOk = ramo.requisitos.every((req) => estado[req]);
+    const btn = document.getElementById(ramo.id);
+    if (requisitosOk && btn) {
+      btn.disabled = false;
+    }
+  });
+}
+
+crearMalla();
+
